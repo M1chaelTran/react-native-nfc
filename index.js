@@ -50,4 +50,8 @@ NFC.removeAllListeners = () => {
   _registeredToEvents = false
 }
 
+NFC.isEnabled = () => NativeModules.ReactNativeNFC.isEnabled()
+
+NFC.isAvailable = () => NativeModules.ReactNativeNFC.isAvailable()
+
 export default NFC

@@ -18,9 +18,12 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+
 import com.novadart.reactnativenfc.parser.NdefParser;
 import com.novadart.reactnativenfc.parser.TagParser;
+import com.novadart.reactnativenfc.utils.NFCUtils;
 
 public class ReactNativeNFCModule extends ReactContextBaseJavaModule implements ActivityEventListener,LifecycleEventListener {
 
@@ -31,11 +34,13 @@ public class ReactNativeNFCModule extends ReactContextBaseJavaModule implements 
     private boolean startupNfcDataRetrieved = false;
 
     private boolean startupIntentProcessed = false;
+    ReactApplicationContext reactContext;
 
     public ReactNativeNFCModule(ReactApplicationContext reactContext) {
         super(reactContext);
         reactContext.addActivityEventListener(this);
         reactContext.addLifecycleEventListener(this);
+        this.reactContext = reactContext;
     }
 
     @Override
@@ -104,6 +109,15 @@ public class ReactNativeNFCModule extends ReactContextBaseJavaModule implements 
         }
     }
 
+    @ReactMethod
+    public void isEnabled(final Promise promise){
+        promise.resolve(NFCUtils.isNfcEnabled(this.reactContext.getApplicationContext()));
+    }
+
+    @ReactMethod
+    public void isAvailable(final Promise promise){
+        promise.resolve(NFCUtils.isNfcAvailable(this.reactContext.getApplicationContext()));
+    }
 
     private void sendEvent(@Nullable WritableMap payload) {
         getReactApplicationContext()
