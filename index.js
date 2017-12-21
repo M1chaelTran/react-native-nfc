@@ -1,53 +1,53 @@
-'use strict';
+'use strict'
 
-import { NativeModules, DeviceEventEmitter } from 'react-native';
+import {NativeModules, DeviceEventEmitter} from 'react-native'
 
 export const NfcDataType = {
-    NDEF : "NDEF",
-    TAG : "TAG"
-};
+  NDEF: 'NDEF',
+  TAG: 'TAG',
+}
 
 export const NdefRecordType = {
-    TEXT : "TEXT",
-    URI : "URI",
-    MIME : "MIME"
-};
+  TEXT: 'TEXT',
+  URI: 'URI',
+  MIME: 'MIME',
+}
 
-const NFC_DISCOVERED = '__NFC_DISCOVERED';
-let _registeredToEvents = false;
-let _listeners = {};
+const NFC_DISCOVERED = '__NFC_DISCOVERED'
+let _registeredToEvents = false
+let _listeners = {}
 
 let _registerToEvents = () => {
-    if(!_registeredToEvents){
-        NativeModules.ReactNativeNFC.getStartUpNfcData(_notifyListeners);
-        DeviceEventEmitter.addListener(NFC_DISCOVERED, _notifyListeners);
-        _registeredToEvents = true;
-    }
-};
+  if (!_registeredToEvents) {
+    NativeModules.ReactNativeNFC.getStartUpNfcData(_notifyListeners)
+    DeviceEventEmitter.addListener(NFC_DISCOVERED, _notifyListeners)
+    _registeredToEvents = true
+  }
+}
 
-let _notifyListeners = (data) => {
-    if(data){
-        for(let _listener in _listeners){
-            _listeners[_listener](data);
-        }
+let _notifyListeners = data => {
+  if (data) {
+    for (let _listener in _listeners) {
+      _listeners[_listener](data)
     }
-};
+  }
+}
 
-const NFC = {};
+const NFC = {}
 
 NFC.addListener = (name, callback) => {
-    _listeners[name] = callback;
-    _registerToEvents();
-};
+  _listeners[name] = callback
+  _registerToEvents()
+}
 
-NFC.removeListener = (name) => {
-    delete _listeners[name];
-};
+NFC.removeListener = name => {
+  delete _listeners[name]
+}
 
 NFC.removeAllListeners = () => {
-    DeviceEventEmitter.removeAllListeners(NFC_DISCOVERED);
-    _listeners = {};
-    _registeredToEvents = false;
-};
+  DeviceEventEmitter.removeAllListeners(NFC_DISCOVERED)
+  _listeners = {}
+  _registeredToEvents = false
+}
 
-export default NFC;
+export default NFC
