@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
-import {StyleSheet, Text, View, Button} from 'react-native'
-import NFC, {NfcDataType, NdefRecordType} from 'react-native-nfc'
+import {Button, StyleSheet, Text, View} from 'react-native'
+import NFC from 'react-native-nfc'
 
 const reactNativeNfc = 'REACT-NATIVE-NFC'
 export default class App extends Component {
@@ -8,26 +8,50 @@ export default class App extends Component {
     type: '',
     id: '',
     description: '',
-    techList: [],
+    techList: '',
     start: false,
+    nfcAvailable: false,
+    nfcEnabled: false,
   }
 
-  start = () => {
-    NFC.addListener(reactNativeNfc, payload => {
-      console.log('payload', payload)
-      const {type, techList, id, description} = payload.data
-      this.setState({type, techList, id, description})
+  async componentDidMount() {
+    const getNfcAvailable = NFC.isNfcAvailable()
+    const getNfcEnabled = NFC.isNfcEnabled()
+    await Promise.all(getNfcAvailable, getNfcEnabled)
+    this.setState({
+      nfcAvailable: await getNfcAvailable,
+      nfcEnabled: await getNfcEnabled,
     })
-    this.setState({start: true})
   }
 
-  stop = () => {
-    NFC.removeListener(reactNativeNfc)
-    this.setState({start: false})
+  start = async () => {
+    if (this.state.nfcAvailable) {
+      NFC.addListener(reactNativeNfc, payload => {
+        console.log('payload', payload)
+        const {type, techList, id, description} = payload.data
+        this.setState({type, techList, id, description})
+      })
+      this.setState({start: true, nfcEnabled: await NFC.isEnabled()})
+    }
+  }
+
+  stop = async () => {
+    if (this.state.nfcAvailable) {
+      NFC.removeListener(reactNativeNfc)
+      this.setState({start: false, nfcEnabled: await NFC.isEnabled()})
+    }
   }
 
   render() {
-    const {type, techList, id, description, start} = this.state
+    const {
+      type,
+      techList,
+      id,
+      description,
+      start,
+      nfcAvailable,
+      nfcEnabled,
+    } = this.state
     return (
       <View style={styles.container}>
         <Text style={styles.heading}>
@@ -36,6 +60,12 @@ export default class App extends Component {
         <View style={styles.info}>
           <Text style={styles.block}>
             Started: {start ? 'Yes' : 'No'}
+          </Text>
+          <Text style={styles.block}>
+            NFC Available: {nfcAvailable ? 'Yes' : 'No'}
+          </Text>
+          <Text style={styles.block}>
+            NFC Enabled: {nfcEnabled ? 'Yes' : 'No'}
           </Text>
           <Text style={styles.block}>
             ID: {id}
@@ -50,12 +80,15 @@ export default class App extends Component {
             TECH: {techList}
           </Text>
         </View>
-        <View style={styles.button}>
-          <Button title="Start" onPress={this.start} />
-        </View>
-        <View style={styles.button}>
-          <Button title="Stop" onPress={this.stop} />
-        </View>
+        {nfcAvailable &&
+          <View>
+            <View style={styles.button}>
+              <Button title="Start" onPress={this.start} />
+            </View>
+            <View style={styles.button}>
+              <Button title="Stop" onPress={this.stop} />
+            </View>
+          </View>}
       </View>
     )
   }
