@@ -15,8 +15,8 @@ export default class App extends Component {
   }
 
   async componentDidMount() {
-    const getNfcAvailable = NFC.isNfcAvailable()
-    const getNfcEnabled = NFC.isNfcEnabled()
+    const getNfcAvailable = NFC.isAvailable()
+    const getNfcEnabled = NFC.isEnabled()
     await Promise.all(getNfcAvailable, getNfcEnabled)
     this.setState({
       nfcAvailable: await getNfcAvailable,
